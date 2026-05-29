@@ -110,6 +110,21 @@ def add_schedule():
     return jsonify(item)
 
 
+@app.route("/api/schedules/<sid>", methods=["PUT"])
+def update_schedule(sid):
+    user = session.get("user")
+    if not user:
+        return jsonify({"error": "로그인 필요"}), 401
+    data = load(user)
+    for s in data:
+        if s["id"] == sid:
+            body = request.json
+            s.update({k: v for k, v in body.items() if k != "id"})
+            break
+    save(user, data)
+    return jsonify({"ok": True})
+
+
 @app.route("/api/schedules/<sid>", methods=["DELETE"])
 def delete_schedule(sid):
     user = session.get("user")
