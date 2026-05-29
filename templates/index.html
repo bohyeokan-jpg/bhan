@@ -195,6 +195,43 @@
       background: #fff5f5; color: #e53935; border: 1.5px solid #ffcdd2; font-size: 15px; cursor: pointer; font-weight: 600;
     }
 
+    /* 테마 */
+    body.theme-blue   { --main:#4a90d9; --dark:#2171c7; --light:#e8f0fe; --bg:#f0f4f8; }
+    body.theme-green  { --main:#43a047; --dark:#2e7d32; --light:#e8f5e9; --bg:#f1f8f1; }
+    body.theme-purple { --main:#7e57c2; --dark:#512da8; --light:#ede7f6; --bg:#f3f0f9; }
+    body.theme-pink   { --main:#e91e8c; --dark:#c2185b; --light:#fce4ec; --bg:#fdf0f6; }
+    body.theme-orange { --main:#f57c00; --dark:#e65100; --light:#fff3e0; --bg:#fdf6f0; }
+    body.theme-gray   { --main:#546e7a; --dark:#37474f; --light:#eceff1; --bg:#f4f5f6; }
+
+    body { background: var(--bg, #f0f4f8); }
+    header { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
+    .cal-header button { color: var(--main,#4a90d9); }
+    .day.today .day-num { background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
+    .day.selected .day-num { background: var(--main,#4a90d9); }
+    .day:active { background: var(--light,#e8f0fe); }
+    .count-badge { background: var(--main,#4a90d9); }
+    .schedule-card { border-left-color: var(--main,#4a90d9); }
+    .schedule-time { color: var(--main,#4a90d9); }
+    .form-group input:focus { border-color: var(--main,#4a90d9); }
+    .mic-btn { border-color: var(--main,#4a90d9); background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
+    .save-btn { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
+    .fab { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); box-shadow: 0 4px 16px color-mix(in srgb, var(--main,#4a90d9) 50%, transparent); }
+    .detail-chip { background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
+    .logout-btn { background: rgba(255,255,255,0.2); }
+    .login-title { color: var(--dark,#2171c7); }
+    .login-btn { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
+
+    /* 테마 선택 시트 */
+    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+    .theme-item {
+      border-radius: 14px; padding: 14px 8px; text-align: center;
+      cursor: pointer; border: 2px solid transparent; transition: all 0.15s;
+    }
+    .theme-item:active { transform: scale(0.95); }
+    .theme-item.active { border-color: #333; }
+    .theme-circle { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 8px; }
+    .theme-name { font-size: 13px; font-weight: 600; color: #444; }
+
     /* 백업 버튼 */
     .backup-btn {
       width: 46px; height: 46px; border-radius: 50%;
@@ -228,7 +265,10 @@
       <h1>📅 스케줄 관리</h1>
       <small id="header-username"></small>
     </div>
-    <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    <div style="display:flex;gap:8px;">
+      <button class="logout-btn" onclick="openSheet('theme-sheet')">🎨</button>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
   </header>
 
   <div class="container">
@@ -258,6 +298,43 @@
     <button class="backup-btn" onclick="exportBackup()" title="백업 다운로드">💾</button>
     <button class="backup-btn" onclick="document.getElementById('import-file').click()" title="백업 복원">📂</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+</div>
+
+<!-- 테마 시트 -->
+<div class="backdrop" id="theme-sheet" onclick="backdropClose(event,'theme-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      배경 색상 선택
+      <button class="close-btn" onclick="closeSheet('theme-sheet')">✕</button>
+    </div>
+    <div class="theme-grid">
+      <div class="theme-item" onclick="setTheme('blue')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#4a90d9,#2171c7)"></div>
+        <div class="theme-name">하늘 (기본)</div>
+      </div>
+      <div class="theme-item" onclick="setTheme('green')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#43a047,#2e7d32)"></div>
+        <div class="theme-name">초록</div>
+      </div>
+      <div class="theme-item" onclick="setTheme('purple')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#7e57c2,#512da8)"></div>
+        <div class="theme-name">보라</div>
+      </div>
+      <div class="theme-item" onclick="setTheme('pink')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#e91e8c,#c2185b)"></div>
+        <div class="theme-name">핑크</div>
+      </div>
+      <div class="theme-item" onclick="setTheme('orange')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#f57c00,#e65100)"></div>
+        <div class="theme-name">주황</div>
+      </div>
+      <div class="theme-item" onclick="setTheme('gray')">
+        <div class="theme-circle" style="background:linear-gradient(135deg,#546e7a,#37474f)"></div>
+        <div class="theme-name">다크그레이</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -332,6 +409,7 @@
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'block';
     document.getElementById('header-username').textContent = `${user}님의 스케줄`;
+    loadTheme();
     loadSchedules();
   }
 
@@ -494,6 +572,31 @@
       }
     });
   }, 30000);
+
+  // 테마
+  async function setTheme(theme) {
+    document.body.className = 'theme-' + theme;
+    document.querySelectorAll('.theme-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.theme-item').forEach(el => {
+      if (el.getAttribute('onclick') === `setTheme('${theme}')`) el.classList.add('active');
+    });
+    localStorage.setItem('theme', theme);
+    await fetch('/api/settings', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ theme })
+    });
+    closeSheet('theme-sheet');
+  }
+
+  async function loadTheme() {
+    const res = await fetch('/api/settings');
+    const s = await res.json();
+    const theme = s.theme || localStorage.getItem('theme') || 'blue';
+    document.body.className = 'theme-' + theme;
+    document.querySelectorAll('.theme-item').forEach(el => {
+      if (el.getAttribute('onclick') === `setTheme('${theme}')`) el.classList.add('active');
+    });
+  }
 
   // 백업 내보내기
   function exportBackup() {

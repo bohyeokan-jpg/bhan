@@ -51,6 +51,43 @@ def me():
     return jsonify({"user": session.get("user")})
 
 
+def settings_file(user):
+    return os.path.join(BASE_DIR, f"settings_{user}.json")
+
+
+def load_settings(user):
+    f = settings_file(user)
+    if os.path.exists(f):
+        with open(f, "r", encoding="utf-8") as fp:
+            return json.load(fp)
+    return {"theme": "blue"}
+
+
+def save_settings(user, data):
+    os.makedirs(BASE_DIR, exist_ok=True)
+    with open(settings_file(user), "w", encoding="utf-8") as fp:
+        json.dump(data, fp, ensure_ascii=False)
+
+
+@app.route("/api/settings")
+def get_settings():
+    user = session.get("user")
+    if not user:
+        return jsonify({"theme": "blue"})
+    return jsonify(load_settings(user))
+
+
+@app.route("/api/settings", methods=["POST"])
+def update_settings():
+    user = session.get("user")
+    if not user:
+        return jsonify({"error": "로그인 필요"}), 401
+    s = load_settings(user)
+    s.update(request.json)
+    save_settings(user, s)
+    return jsonify({"ok": True})
+
+
 @app.route("/api/schedules")
 def get_schedules():
     user = session.get("user")
