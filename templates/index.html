@@ -10,21 +10,30 @@
   <link rel="apple-touch-icon" href="/static/icon-192.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #f0f4f8; color: #222; }
 
-    /* ── 로그인 화면 ── */
+    /* 테마 */
+    body { --main:#4a90d9; --dark:#2171c7; --light:#e8f0fe; --bg:#f0f4f8; }
+    body.theme-blue   { --main:#4a90d9; --dark:#2171c7; --light:#e8f0fe; --bg:#f0f4f8; }
+    body.theme-green  { --main:#43a047; --dark:#2e7d32; --light:#e8f5e9; --bg:#f1f8f1; }
+    body.theme-purple { --main:#7e57c2; --dark:#512da8; --light:#ede7f6; --bg:#f3f0f9; }
+    body.theme-pink   { --main:#e91e8c; --dark:#c2185b; --light:#fce4ec; --bg:#fdf0f6; }
+    body.theme-orange { --main:#f57c00; --dark:#e65100; --light:#fff3e0; --bg:#fdf6f0; }
+    body.theme-gray   { --main:#546e7a; --dark:#37474f; --light:#eceff1; --bg:#f4f5f6; }
+
+    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: #222; }
+
+    /* 로그인 */
     #login-screen {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; justify-content: center; padding: 32px 24px;
-      background: linear-gradient(160deg, #e8f0fe 0%, #f0f4f8 100%);
+      background: linear-gradient(160deg, var(--light) 0%, var(--bg) 100%);
     }
     .login-logo { font-size: 60px; margin-bottom: 12px; }
-    .login-title { font-size: 26px; font-weight: 800; color: #2171c7; margin-bottom: 6px; }
+    .login-title { font-size: 26px; font-weight: 800; color: var(--dark); margin-bottom: 6px; }
     .login-sub { font-size: 14px; color: #888; margin-bottom: 36px; }
     .login-box {
       background: white; border-radius: 20px; padding: 28px 24px;
-      width: 100%; max-width: 360px;
-      box-shadow: 0 4px 24px rgba(74,144,217,0.15);
+      width: 100%; max-width: 360px; box-shadow: 0 4px 24px rgba(0,0,0,0.1);
     }
     .login-box label { font-size: 13px; color: #666; font-weight: 600; display: block; margin-bottom: 8px; }
     .login-box input {
@@ -32,20 +41,18 @@
       padding: 14px 16px; font-size: 17px; outline: none; margin-bottom: 16px;
       transition: border-color 0.2s;
     }
-    .login-box input:focus { border-color: #4a90d9; }
+    .login-box input:focus { border-color: var(--main); }
     .login-btn {
       width: 100%; padding: 15px; border-radius: 12px;
-      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      background: linear-gradient(135deg, var(--main), var(--dark));
       color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer;
     }
-    .login-btn:active { opacity: 0.85; }
     .login-note { font-size: 12px; color: #bbb; text-align: center; margin-top: 14px; }
 
-    /* ── 앱 화면 ── */
+    /* 앱 */
     #app-screen { display: none; }
-
     header {
-      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      background: linear-gradient(135deg, var(--main), var(--dark));
       color: white; padding: 14px 16px;
       display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -53,12 +60,13 @@
     }
     .header-left h1 { font-size: 17px; font-weight: 700; }
     .header-left small { font-size: 11px; opacity: 0.8; }
-    .logout-btn {
+    .header-btns { display: flex; gap: 8px; }
+    .icon-btn {
       background: rgba(255,255,255,0.2); border: none; color: white;
-      border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+      border-radius: 20px; padding: 6px 12px; font-size: 13px; cursor: pointer;
     }
 
-    .container { max-width: 500px; margin: 0 auto; padding: 12px 12px 100px; }
+    .container { max-width: 520px; margin: 0 auto; padding: 12px 12px 100px; }
 
     /* 달력 */
     .calendar-box {
@@ -70,31 +78,50 @@
       padding: 14px 18px; border-bottom: 1px solid #f0f0f0;
     }
     .cal-header button {
-      background: #f0f4f8; border: none; width: 32px; height: 32px;
-      border-radius: 50%; font-size: 16px; cursor: pointer; color: #4a90d9;
+      background: var(--light); border: none; width: 32px; height: 32px;
+      border-radius: 50%; font-size: 16px; cursor: pointer; color: var(--main);
     }
     .cal-title { font-size: 16px; font-weight: 700; }
     .day-names {
       display: grid; grid-template-columns: repeat(7, 1fr);
-      padding: 8px 8px 4px;
+      padding: 8px 4px 4px;
     }
     .day-names div { text-align: center; font-size: 11px; font-weight: 600; color: #999; padding: 4px 0; }
     .day-names div:first-child { color: #e53935; }
     .day-names div:last-child { color: #1565c0; }
-    .days { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 8px 12px; gap: 2px; }
-    .day {
-      text-align: center; padding: 6px 2px 4px; border-radius: 10px;
-      cursor: pointer; font-size: 13px; user-select: none;
-      display: flex; flex-direction: column; align-items: center;
+
+    .days {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 0 4px 8px;
     }
-    .day:active { background: #e8f0fe; }
-    .day-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-    .day.today .day-num { background: #e8f0fe; color: #4a90d9; font-weight: 700; }
-    .day.selected .day-num { background: #4a90d9; color: white; font-weight: 700; }
-    .dot-row { display: flex; gap: 2px; margin-top: 2px; min-height: 6px; }
-    .dot { width: 5px; height: 5px; border-radius: 50%; background: #ff7043; }
-    .day.selected .dot { background: rgba(255,255,255,0.8); }
+    .day {
+      min-height: 56px; padding: 4px 2px 2px;
+      border-radius: 8px; cursor: pointer;
+      font-size: 12px; user-select: none;
+      display: flex; flex-direction: column; align-items: center;
+      position: relative;
+    }
+    .day:active { background: var(--light); }
+    .day-num {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-size: 13px; margin-bottom: 2px;
+    }
+    .day.today .day-num { background: var(--light); color: var(--main); font-weight: 700; }
+    .day.selected .day-num { background: var(--main); color: white; font-weight: 700; }
     .day.empty { cursor: default; }
+
+    /* 일정 바 */
+    .event-bars { width: 100%; display: flex; flex-direction: column; gap: 1px; }
+    .event-bar {
+      height: 6px; border-radius: 3px;
+      width: 100%; font-size: 0;
+      cursor: pointer;
+    }
+    .event-bar.bar-start { border-radius: 3px 0 0 3px; margin-left: 2px; width: calc(100% - 2px); }
+    .event-bar.bar-middle { border-radius: 0; }
+    .event-bar.bar-end   { border-radius: 0 3px 3px 0; margin-right: 2px; width: calc(100% - 2px); }
+    .event-bar.bar-single { border-radius: 3px; margin: 0 2px; width: calc(100% - 4px); }
 
     /* 일정 목록 */
     .section-header {
@@ -103,7 +130,7 @@
     }
     .section-title { font-size: 15px; font-weight: 700; color: #444; }
     .count-badge {
-      background: #4a90d9; color: white;
+      background: var(--main); color: white;
       border-radius: 20px; padding: 2px 10px; font-size: 12px;
     }
     .schedule-list { display: flex; flex-direction: column; gap: 8px; }
@@ -111,11 +138,13 @@
       background: white; border-radius: 14px; padding: 14px 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       display: flex; align-items: center; gap: 12px; cursor: pointer;
-      border-left: 4px solid #4a90d9; transition: transform 0.1s;
+      border-left: 4px solid var(--main); transition: transform 0.1s;
     }
     .schedule-card:active { transform: scale(0.98); }
-    .schedule-time { font-size: 13px; color: #4a90d9; font-weight: 700; min-width: 46px; text-align: center; }
-    .schedule-content { flex: 1; font-size: 15px; color: #222; line-height: 1.4; }
+    .card-color-bar { width: 4px; height: 40px; border-radius: 2px; flex-shrink: 0; }
+    .schedule-time { font-size: 12px; color: #666; min-width: 90px; }
+    .schedule-time .time-range { font-weight: 700; color: var(--main); display: block; }
+    .schedule-content { flex: 1; font-size: 15px; color: #222; }
     .schedule-del { background: none; border: none; color: #ddd; font-size: 16px; cursor: pointer; padding: 4px; }
     .schedule-del:active { color: #e53935; }
     .empty-msg {
@@ -128,12 +157,22 @@
     .fab {
       position: fixed; bottom: 28px; right: 20px;
       width: 58px; height: 58px; border-radius: 50%;
-      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      background: linear-gradient(135deg, var(--main), var(--dark));
       color: white; border: none; font-size: 26px; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(74,144,217,0.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       display: flex; align-items: center; justify-content: center;
     }
     .fab:active { transform: scale(0.92); }
+
+    /* 백업 버튼 */
+    .backup-area { position: fixed; bottom: 28px; left: 20px; display: flex; gap: 10px; z-index: 50; }
+    .backup-btn {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: white; border: none; font-size: 20px; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .backup-btn:active { transform: scale(0.9); }
 
     /* 시트 모달 */
     .backdrop {
@@ -143,7 +182,7 @@
     .backdrop.open { display: flex; }
     .sheet {
       background: white; border-radius: 22px 22px 0 0;
-      width: 100%; max-width: 500px; padding: 0 20px 40px;
+      width: 100%; max-width: 520px; padding: 0 20px 40px;
       max-height: 90vh; overflow-y: auto;
       animation: slideUp 0.25s ease;
     }
@@ -157,17 +196,30 @@
       background: #f0f4f8; border: none; width: 30px; height: 30px;
       border-radius: 50%; font-size: 14px; cursor: pointer; color: #888;
     }
+
+    /* 폼 */
     .form-group { margin-bottom: 14px; }
     .form-group label { font-size: 12px; color: #888; font-weight: 600; display: block; margin-bottom: 6px; }
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%; border: 1.5px solid #e8e8e8; border-radius: 10px;
       padding: 12px 14px; font-size: 15px; outline: none; transition: border-color 0.2s;
+      background: white;
     }
-    .form-group input:focus { border-color: #4a90d9; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--main); }
+    .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* 색상 선택 */
+    .color-picker { display: flex; gap: 10px; flex-wrap: wrap; }
+    .color-dot {
+      width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: transform 0.1s;
+    }
+    .color-dot.selected { border-color: #333; transform: scale(1.15); }
+
     .mic-btn {
       width: 100%; padding: 12px; border-radius: 10px;
-      border: 1.5px dashed #4a90d9; background: #f5f9ff;
-      color: #4a90d9; font-size: 14px; cursor: pointer; margin-bottom: 8px; font-weight: 600;
+      border: 1.5px dashed var(--main); background: var(--light);
+      color: var(--main); font-size: 14px; cursor: pointer; margin-bottom: 8px; font-weight: 600;
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .mic-btn.recording { background: #fff5f5; border-color: #e53935; color: #e53935; animation: pulse 1s infinite; }
@@ -175,17 +227,17 @@
     .mic-status { font-size: 12px; color: #888; margin-bottom: 12px; min-height: 16px; text-align: center; }
     .save-btn {
       width: 100%; padding: 15px; border-radius: 12px;
-      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      background: linear-gradient(135deg, var(--main), var(--dark));
       color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer;
     }
     .save-btn:active { opacity: 0.85; }
 
     /* 상세 */
     .detail-chip {
-      display: inline-block; background: #e8f0fe; color: #4a90d9;
+      display: inline-block; background: var(--light); color: var(--main);
       border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px;
     }
-    .detail-time { font-size: 28px; font-weight: 800; color: #222; margin-bottom: 10px; }
+    .detail-time { font-size: 22px; font-weight: 800; color: #222; margin-bottom: 10px; }
     .detail-content {
       font-size: 16px; line-height: 1.7; color: #444;
       background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
@@ -196,55 +248,19 @@
     }
 
     /* 테마 */
-    body.theme-blue   { --main:#4a90d9; --dark:#2171c7; --light:#e8f0fe; --bg:#f0f4f8; }
-    body.theme-green  { --main:#43a047; --dark:#2e7d32; --light:#e8f5e9; --bg:#f1f8f1; }
-    body.theme-purple { --main:#7e57c2; --dark:#512da8; --light:#ede7f6; --bg:#f3f0f9; }
-    body.theme-pink   { --main:#e91e8c; --dark:#c2185b; --light:#fce4ec; --bg:#fdf0f6; }
-    body.theme-orange { --main:#f57c00; --dark:#e65100; --light:#fff3e0; --bg:#fdf6f0; }
-    body.theme-gray   { --main:#546e7a; --dark:#37474f; --light:#eceff1; --bg:#f4f5f6; }
-
-    body { background: var(--bg, #f0f4f8); }
-    header { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
-    .cal-header button { color: var(--main,#4a90d9); }
-    .day.today .day-num { background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
-    .day.selected .day-num { background: var(--main,#4a90d9); }
-    .day:active { background: var(--light,#e8f0fe); }
-    .count-badge { background: var(--main,#4a90d9); }
-    .schedule-card { border-left-color: var(--main,#4a90d9); }
-    .schedule-time { color: var(--main,#4a90d9); }
-    .form-group input:focus { border-color: var(--main,#4a90d9); }
-    .mic-btn { border-color: var(--main,#4a90d9); background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
-    .save-btn { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
-    .fab { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); box-shadow: 0 4px 16px color-mix(in srgb, var(--main,#4a90d9) 50%, transparent); }
-    .detail-chip { background: var(--light,#e8f0fe); color: var(--main,#4a90d9); }
-    .logout-btn { background: rgba(255,255,255,0.2); }
-    .login-title { color: var(--dark,#2171c7); }
-    .login-btn { background: linear-gradient(135deg, var(--main,#4a90d9), var(--dark,#2171c7)); }
-
-    /* 테마 선택 시트 */
     .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
     .theme-item {
       border-radius: 14px; padding: 14px 8px; text-align: center;
-      cursor: pointer; border: 2px solid transparent; transition: all 0.15s;
+      cursor: pointer; border: 2px solid transparent; transition: all 0.15s; background: #f8f8f8;
     }
-    .theme-item:active { transform: scale(0.95); }
     .theme-item.active { border-color: #333; }
     .theme-circle { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 8px; }
     .theme-name { font-size: 13px; font-weight: 600; color: #444; }
-
-    /* 백업 버튼 */
-    .backup-btn {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: white; border: none; font-size: 20px; cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .backup-btn:active { transform: scale(0.9); }
   </style>
 </head>
-<body>
+<body class="theme-blue">
 
-<!-- 로그인 화면 -->
+<!-- 로그인 -->
 <div id="login-screen">
   <div class="login-logo">📅</div>
   <div class="login-title">스케줄 관리</div>
@@ -258,16 +274,16 @@
   </div>
 </div>
 
-<!-- 앱 화면 -->
+<!-- 앱 -->
 <div id="app-screen">
   <header>
     <div class="header-left">
       <h1>📅 스케줄 관리</h1>
       <small id="header-username"></small>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="logout-btn" onclick="openSheet('theme-sheet')">🎨</button>
-      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="openSheet('theme-sheet')">🎨</button>
+      <button class="icon-btn" onclick="doLogout()">로그아웃</button>
     </div>
   </header>
 
@@ -292,9 +308,7 @@
   </div>
 
   <button class="fab" onclick="openAdd()">＋</button>
-
-  <!-- 백업 버튼 (하단 고정) -->
-  <div style="position:fixed;bottom:28px;left:20px;display:flex;gap:10px;z-index:50;">
+  <div class="backup-area">
     <button class="backup-btn" onclick="exportBackup()" title="백업 다운로드">💾</button>
     <button class="backup-btn" onclick="document.getElementById('import-file').click()" title="백업 복원">📂</button>
     <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
@@ -305,35 +319,14 @@
 <div class="backdrop" id="theme-sheet" onclick="backdropClose(event,'theme-sheet')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">
-      배경 색상 선택
-      <button class="close-btn" onclick="closeSheet('theme-sheet')">✕</button>
-    </div>
+    <div class="sheet-title">배경 색상 선택 <button class="close-btn" onclick="closeSheet('theme-sheet')">✕</button></div>
     <div class="theme-grid">
-      <div class="theme-item" onclick="setTheme('blue')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#4a90d9,#2171c7)"></div>
-        <div class="theme-name">하늘 (기본)</div>
-      </div>
-      <div class="theme-item" onclick="setTheme('green')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#43a047,#2e7d32)"></div>
-        <div class="theme-name">초록</div>
-      </div>
-      <div class="theme-item" onclick="setTheme('purple')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#7e57c2,#512da8)"></div>
-        <div class="theme-name">보라</div>
-      </div>
-      <div class="theme-item" onclick="setTheme('pink')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#e91e8c,#c2185b)"></div>
-        <div class="theme-name">핑크</div>
-      </div>
-      <div class="theme-item" onclick="setTheme('orange')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#f57c00,#e65100)"></div>
-        <div class="theme-name">주황</div>
-      </div>
-      <div class="theme-item" onclick="setTheme('gray')">
-        <div class="theme-circle" style="background:linear-gradient(135deg,#546e7a,#37474f)"></div>
-        <div class="theme-name">다크그레이</div>
-      </div>
+      <div class="theme-item" onclick="setTheme('blue')"><div class="theme-circle" style="background:linear-gradient(135deg,#4a90d9,#2171c7)"></div><div class="theme-name">하늘</div></div>
+      <div class="theme-item" onclick="setTheme('green')"><div class="theme-circle" style="background:linear-gradient(135deg,#43a047,#2e7d32)"></div><div class="theme-name">초록</div></div>
+      <div class="theme-item" onclick="setTheme('purple')"><div class="theme-circle" style="background:linear-gradient(135deg,#7e57c2,#512da8)"></div><div class="theme-name">보라</div></div>
+      <div class="theme-item" onclick="setTheme('pink')"><div class="theme-circle" style="background:linear-gradient(135deg,#e91e8c,#c2185b)"></div><div class="theme-name">핑크</div></div>
+      <div class="theme-item" onclick="setTheme('orange')"><div class="theme-circle" style="background:linear-gradient(135deg,#f57c00,#e65100)"></div><div class="theme-name">주황</div></div>
+      <div class="theme-item" onclick="setTheme('gray')"><div class="theme-circle" style="background:linear-gradient(135deg,#546e7a,#37474f)"></div><div class="theme-name">그레이</div></div>
     </div>
   </div>
 </div>
@@ -342,15 +335,32 @@
 <div class="backdrop" id="add-sheet" onclick="backdropClose(event,'add-sheet')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">
-      일정 추가
-      <button class="close-btn" onclick="closeSheet('add-sheet')">✕</button>
-    </div>
+    <div class="sheet-title">일정 추가 <button class="close-btn" onclick="closeSheet('add-sheet')">✕</button></div>
+
     <div class="form-group"><label>날짜</label><input type="date" id="in-date"></div>
-    <div class="form-group"><label>시간</label><input type="time" id="in-time"></div>
+    <div class="form-group">
+      <label>시간</label>
+      <div class="time-row">
+        <input type="time" id="in-start" placeholder="시작">
+        <input type="time" id="in-end" placeholder="종료">
+      </div>
+    </div>
     <div class="form-group">
       <label>내용</label>
       <input type="text" id="in-content" placeholder="일정 내용을 입력하세요">
+    </div>
+    <div class="form-group">
+      <label>색상</label>
+      <div class="color-picker" id="color-picker">
+        <div class="color-dot selected" style="background:#4a90d9" data-color="#4a90d9" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#43a047" data-color="#43a047" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#e53935" data-color="#e53935" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#f57c00" data-color="#f57c00" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#7e57c2" data-color="#7e57c2" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#e91e8c" data-color="#e91e8c" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#00897b" data-color="#00897b" onclick="selectColor(this)"></div>
+        <div class="color-dot" style="background:#546e7a" data-color="#546e7a" onclick="selectColor(this)"></div>
+      </div>
     </div>
     <button class="mic-btn" id="mic-btn" onclick="toggleVoice()">
       <span>🎤</span><span id="mic-text">말로 입력하기</span>
@@ -364,10 +374,7 @@
 <div class="backdrop" id="detail-sheet" onclick="backdropClose(event,'detail-sheet')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">
-      일정 상세
-      <button class="close-btn" onclick="closeSheet('detail-sheet')">✕</button>
-    </div>
+    <div class="sheet-title">일정 상세 <button class="close-btn" onclick="closeSheet('detail-sheet')">✕</button></div>
     <span class="detail-chip" id="d-date"></span>
     <div class="detail-time" id="d-time"></div>
     <div class="detail-content" id="d-content"></div>
@@ -378,6 +385,7 @@
 <script>
   let schedules = [], year, month, selDate, detailId;
   let isRecording = false, recognition = null;
+  let selectedColor = '#4a90d9';
 
   const todayStr = new Date().toISOString().slice(0,10);
   const now = new Date();
@@ -386,7 +394,6 @@
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
 
-  // 로그인 체크
   async function init() {
     const res = await fetch('/api/me');
     const data = await res.json();
@@ -434,31 +441,72 @@
     renderCalendar();
   }
 
+  // 날짜 범위 계산 (start~end 사이 모든 날짜)
+  function getDatesInRange(startDate, endDate) {
+    const dates = [];
+    const cur = new Date(startDate);
+    const end = new Date(endDate);
+    while (cur <= end) {
+      dates.push(cur.toISOString().slice(0,10));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return dates;
+  }
+
   function renderCalendar() {
     document.getElementById('cal-title').textContent = `${year}년 ${month+1}월`;
     const container = document.getElementById('days');
     container.innerHTML = '';
+
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month+1, 0).getDate();
-    const countMap = {};
-    schedules.forEach(s => { countMap[s.date] = (countMap[s.date]||0)+1; });
+
+    // 날짜별 일정 바 정보 수집
+    const barMap = {}; // { dateStr: [{color, id, position}] }
+    schedules.forEach(s => {
+      const startD = s.date;
+      const endD = s.end_date || s.date;
+      const dates = getDatesInRange(startD, endD);
+      dates.forEach((d, i) => {
+        if (!barMap[d]) barMap[d] = [];
+        let pos = 'single';
+        if (dates.length > 1) {
+          if (i === 0) pos = 'start';
+          else if (i === dates.length - 1) pos = 'end';
+          else pos = 'middle';
+        }
+        barMap[d].push({ color: s.color || '#4a90d9', id: s.id, pos, content: s.content });
+      });
+    });
 
     for (let i = 0; i < firstDay; i++) {
       container.appendChild(Object.assign(document.createElement('div'), {className:'day empty'}));
     }
+
     for (let d = 1; d <= lastDate; d++) {
       const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const el = document.createElement('div');
       el.className = 'day' + (ds===todayStr?' today':'') + (ds===selDate?' selected':'');
+
       const num = document.createElement('div');
       num.className = 'day-num'; num.textContent = d;
       el.appendChild(num);
-      const cnt = countMap[ds]||0;
-      if (cnt > 0) {
-        const row = document.createElement('div'); row.className = 'dot-row';
-        for (let i = 0; i < Math.min(cnt,3); i++) row.appendChild(Object.assign(document.createElement('div'),{className:'dot'}));
-        el.appendChild(row);
+
+      // 바 표시
+      const bars = barMap[ds] || [];
+      if (bars.length > 0) {
+        const barsEl = document.createElement('div');
+        barsEl.className = 'event-bars';
+        bars.slice(0, 3).forEach(b => {
+          const bar = document.createElement('div');
+          bar.className = `event-bar bar-${b.pos}`;
+          bar.style.background = b.color;
+          bar.title = b.content;
+          barsEl.appendChild(bar);
+        });
+        el.appendChild(barsEl);
       }
+
       el.onclick = () => { selDate = ds; renderCalendar(); renderList(); };
       container.appendChild(el);
     }
@@ -469,41 +517,75 @@
     document.getElementById('list-title').textContent = `${d.getMonth()+1}월 ${d.getDate()}일 일정`;
     const badge = document.getElementById('count-badge');
     const list = document.getElementById('schedule-list');
-    const items = schedules.filter(s=>s.date===selDate).sort((a,b)=>a.time.localeCompare(b.time));
+
+    // 선택 날짜에 걸쳐있는 일정 모두 표시
+    const items = schedules.filter(s => {
+      const end = s.end_date || s.date;
+      return selDate >= s.date && selDate <= end;
+    }).sort((a,b) => a.start_time.localeCompare(b.start_time));
+
     badge.style.display = items.length > 0 ? 'inline-block' : 'none';
     badge.textContent = `${items.length}개`;
     list.innerHTML = '';
+
     if (items.length === 0) {
       list.innerHTML = '<div class="empty-msg"><span class="emoji">📭</span>등록된 일정이 없어요<br><small style="color:#ccc;margin-top:4px;display:block">+ 버튼으로 추가해보세요</small></div>';
       return;
     }
+
     items.forEach(s => {
       const card = document.createElement('div');
       card.className = 'schedule-card';
-      card.innerHTML = `<div class="schedule-time">${s.time}</div><div class="schedule-content">${s.content}</div><button class="schedule-del" onclick="event.stopPropagation();delSchedule('${s.id}')">✕</button>`;
+      card.style.borderLeftColor = s.color || 'var(--main)';
+
+      const timeStr = s.end_date && s.end_date !== s.date
+        ? `${s.date} ~ ${s.end_date}`
+        : `${s.start_time} ~ ${s.end_time || s.start_time}`;
+
+      card.innerHTML = `
+        <div style="width:4px;height:40px;border-radius:2px;background:${s.color||'var(--main)'};flex-shrink:0"></div>
+        <div class="schedule-time">
+          <span class="time-range">${s.start_time} ~ ${s.end_time||s.start_time}</span>
+          ${s.end_date && s.end_date !== s.date ? `<small style="color:#aaa">${s.date} ~ ${s.end_date}</small>` : ''}
+        </div>
+        <div class="schedule-content">${s.content}</div>
+        <button class="schedule-del" onclick="event.stopPropagation();delSchedule('${s.id}')">✕</button>
+      `;
       card.onclick = () => openDetail(s);
       list.appendChild(card);
     });
   }
 
+  function selectColor(el) {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedColor = el.dataset.color;
+  }
+
   function openAdd() {
     document.getElementById('in-date').value = selDate;
-    document.getElementById('in-time').value = new Date().toTimeString().slice(0,5);
+    document.getElementById('in-start').value = new Date().toTimeString().slice(0,5);
+    document.getElementById('in-end').value = '';
     document.getElementById('in-content').value = '';
     document.getElementById('mic-status').textContent = '';
     document.getElementById('mic-btn').classList.remove('recording');
     document.getElementById('mic-text').textContent = '말로 입력하기';
+    // 기본 색상 초기화
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+    document.querySelector('.color-dot').classList.add('selected');
+    selectedColor = '#4a90d9';
     openSheet('add-sheet');
   }
 
   async function saveSchedule() {
     const date = document.getElementById('in-date').value;
-    const time = document.getElementById('in-time').value;
+    const start_time = document.getElementById('in-start').value;
+    const end_time = document.getElementById('in-end').value || start_time;
     const content = document.getElementById('in-content').value.trim();
-    if (!date||!time||!content) { alert('날짜, 시간, 내용을 모두 입력해주세요.'); return; }
+    if (!date || !start_time || !content) { alert('날짜, 시작 시간, 내용을 입력해주세요.'); return; }
     await fetch('/api/schedules', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ date, time, content })
+      body: JSON.stringify({ date, end_date: date, start_time, end_time, time: start_time, content, color: selectedColor })
     });
     if (recognition) recognition.stop();
     closeSheet('add-sheet');
@@ -519,9 +601,12 @@
   function openDetail(s) {
     detailId = s.id;
     const d = new Date(s.date);
-    document.getElementById('d-date').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
-    document.getElementById('d-time').textContent = s.time;
+    document.getElementById('d-date').textContent =
+      `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+    document.getElementById('d-time').textContent =
+      `${s.start_time} ~ ${s.end_time || s.start_time}`;
     document.getElementById('d-content').textContent = s.content;
+    document.getElementById('detail-sheet').querySelector('.detail-time').style.color = s.color || 'var(--main)';
     openSheet('detail-sheet');
   }
 
@@ -532,6 +617,7 @@
     loadSchedules();
   }
 
+  // 음성 입력
   function toggleVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { alert('음성 인식은 Chrome 브라우저에서 지원됩니다.'); return; }
@@ -558,27 +644,11 @@
     recognition.start();
   }
 
-  function openSheet(id) { document.getElementById(id).classList.add('open'); }
-  function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
-  function backdropClose(e, id) { if (e.target.classList.contains('backdrop')) closeSheet(id); }
-
-  setInterval(() => {
-    const n = new Date();
-    const ns = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-    schedules.forEach(s => {
-      if (!s._alerted && `${s.date} ${s.time}` === ns) {
-        if (Notification.permission==='granted') new Notification('📅 스케줄 알림', { body:`${s.time} — ${s.content}`, icon:'/static/icon-192.png' });
-        s._alerted = true;
-      }
-    });
-  }, 30000);
-
   // 테마
   async function setTheme(theme) {
     document.body.className = 'theme-' + theme;
-    document.querySelectorAll('.theme-item').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.theme-item').forEach(el => {
-      if (el.getAttribute('onclick') === `setTheme('${theme}')`) el.classList.add('active');
+      el.classList.toggle('active', el.getAttribute('onclick') === `setTheme('${theme}')`);
     });
     localStorage.setItem('theme', theme);
     await fetch('/api/settings', {
@@ -594,36 +664,42 @@
     const theme = s.theme || localStorage.getItem('theme') || 'blue';
     document.body.className = 'theme-' + theme;
     document.querySelectorAll('.theme-item').forEach(el => {
-      if (el.getAttribute('onclick') === `setTheme('${theme}')`) el.classList.add('active');
+      el.classList.toggle('active', el.getAttribute('onclick') === `setTheme('${theme}')`);
     });
   }
 
-  // 백업 내보내기
-  function exportBackup() {
-    window.location.href = '/api/backup/export';
-  }
-
-  // 백업 가져오기
+  // 백업
+  function exportBackup() { window.location.href = '/api/backup/export'; }
   async function importBackup(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const file = event.target.files[0]; if (!file) return;
     const text = await file.text();
-    let backup;
-    try { backup = JSON.parse(text); } catch { alert('올바른 백업 파일이 아니에요.'); return; }
-    if (!confirm(`백업 파일을 복원할까요?\n(기존 일정은 유지되고 새 일정만 추가돼요)`)) return;
+    let backup; try { backup = JSON.parse(text); } catch { alert('올바른 백업 파일이 아니에요.'); return; }
+    if (!confirm('백업 파일을 복원할까요?\n(기존 일정은 유지되고 새 일정만 추가돼요)')) return;
     const res = await fetch('/api/backup/import', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify(backup)
     });
     const data = await res.json();
-    if (data.ok) {
-      alert(`복원 완료!\n새로 추가된 일정: ${data.added}개\n전체 일정: ${data.total}개`);
-      loadSchedules();
-    } else {
-      alert('복원 실패: ' + data.error);
-    }
+    if (data.ok) { alert(`복원 완료!\n추가된 일정: ${data.added}개`); loadSchedules(); }
+    else alert('복원 실패: ' + data.error);
     event.target.value = '';
   }
+
+  // 알림
+  setInterval(() => {
+    const n = new Date();
+    const ns = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    schedules.forEach(s => {
+      if (!s._alerted && `${s.date} ${s.start_time}` === ns) {
+        if (Notification.permission==='granted') new Notification('📅 스케줄 알림', { body:`${s.start_time} — ${s.content}`, icon:'/static/icon-192.png' });
+        s._alerted = true;
+      }
+    });
+  }, 30000);
+
+  function openSheet(id) { document.getElementById(id).classList.add('open'); }
+  function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+  function backdropClose(e, id) { if (e.target.classList.contains('backdrop')) closeSheet(id); }
 
   init();
 </script>
