@@ -813,24 +813,18 @@
     loadSchedules();
   }
 
-  // 백업
-  async function exportBackup() {
-    try {
-      const res = await fetch('/api/backup/export');
-      if (res.status === 401) { alert('로그인이 필요해요.'); return; }
-      const blob = await res.blob();
-      const disposition = res.headers.get('Content-Disposition') || '';
-      let filename = 'schedule_backup.json';
-      const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
-      if (match) filename = decodeURIComponent(match[1].replace(/"/g, ''));
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click();
-      document.body.removeChild(a); URL.revokeObjectURL(url);
-    } catch (e) {
-      alert('백업 실패: ' + e.message);
-    }
+  // 백업 — 브라우저에서 직접 파일 생성 (서버 연결 불필요)
+  function exportBackup() {
+    const today = new Date().toISOString().slice(0,10);
+    const username = document.getElementById('header-username').textContent.replace('님의 스케줄','').trim();
+    const content = JSON.stringify({ user: username, schedules: schedules }, null, 2);
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `schedule_${username}_${today}.json`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
   async function importBackup(event) {
