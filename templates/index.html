@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#4a90d9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>스케줄 관리</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif; background: #f0f4f8; color: #222; }
+
+    /* ── 로그인 화면 ── */
+    #login-screen {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 32px 24px;
+      background: linear-gradient(160deg, #e8f0fe 0%, #f0f4f8 100%);
+    }
+    .login-logo { font-size: 60px; margin-bottom: 12px; }
+    .login-title { font-size: 26px; font-weight: 800; color: #2171c7; margin-bottom: 6px; }
+    .login-sub { font-size: 14px; color: #888; margin-bottom: 36px; }
+    .login-box {
+      background: white; border-radius: 20px; padding: 28px 24px;
+      width: 100%; max-width: 360px;
+      box-shadow: 0 4px 24px rgba(74,144,217,0.15);
+    }
+    .login-box label { font-size: 13px; color: #666; font-weight: 600; display: block; margin-bottom: 8px; }
+    .login-box input {
+      width: 100%; border: 1.5px solid #e0e0e0; border-radius: 12px;
+      padding: 14px 16px; font-size: 17px; outline: none; margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .login-box input:focus { border-color: #4a90d9; }
+    .login-btn {
+      width: 100%; padding: 15px; border-radius: 12px;
+      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .login-btn:active { opacity: 0.85; }
+    .login-note { font-size: 12px; color: #bbb; text-align: center; margin-top: 14px; }
+
+    /* ── 앱 화면 ── */
+    #app-screen { display: none; }
+
+    header {
+      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      color: white; padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-left h1 { font-size: 17px; font-weight: 700; }
+    .header-left small { font-size: 11px; opacity: 0.8; }
+    .logout-btn {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+    }
+
+    .container { max-width: 500px; margin: 0 auto; padding: 12px 12px 100px; }
+
+    /* 달력 */
+    .calendar-box {
+      background: white; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 14px; overflow: hidden;
+    }
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px; border-bottom: 1px solid #f0f0f0;
+    }
+    .cal-header button {
+      background: #f0f4f8; border: none; width: 32px; height: 32px;
+      border-radius: 50%; font-size: 16px; cursor: pointer; color: #4a90d9;
+    }
+    .cal-title { font-size: 16px; font-weight: 700; }
+    .day-names {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 8px 8px 4px;
+    }
+    .day-names div { text-align: center; font-size: 11px; font-weight: 600; color: #999; padding: 4px 0; }
+    .day-names div:first-child { color: #e53935; }
+    .day-names div:last-child { color: #1565c0; }
+    .days { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 8px 12px; gap: 2px; }
+    .day {
+      text-align: center; padding: 6px 2px 4px; border-radius: 10px;
+      cursor: pointer; font-size: 13px; user-select: none;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .day:active { background: #e8f0fe; }
+    .day-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .day.today .day-num { background: #e8f0fe; color: #4a90d9; font-weight: 700; }
+    .day.selected .day-num { background: #4a90d9; color: white; font-weight: 700; }
+    .dot-row { display: flex; gap: 2px; margin-top: 2px; min-height: 6px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: #ff7043; }
+    .day.selected .dot { background: rgba(255,255,255,0.8); }
+    .day.empty { cursor: default; }
+
+    /* 일정 목록 */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; padding: 0 2px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; color: #444; }
+    .count-badge {
+      background: #4a90d9; color: white;
+      border-radius: 20px; padding: 2px 10px; font-size: 12px;
+    }
+    .schedule-list { display: flex; flex-direction: column; gap: 8px; }
+    .schedule-card {
+      background: white; border-radius: 14px; padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      border-left: 4px solid #4a90d9; transition: transform 0.1s;
+    }
+    .schedule-card:active { transform: scale(0.98); }
+    .schedule-time { font-size: 13px; color: #4a90d9; font-weight: 700; min-width: 46px; text-align: center; }
+    .schedule-content { flex: 1; font-size: 15px; color: #222; line-height: 1.4; }
+    .schedule-del { background: none; border: none; color: #ddd; font-size: 16px; cursor: pointer; padding: 4px; }
+    .schedule-del:active { color: #e53935; }
+    .empty-msg {
+      text-align: center; color: #bbb; padding: 32px 0;
+      font-size: 14px; background: white; border-radius: 14px;
+    }
+    .empty-msg .emoji { font-size: 32px; display: block; margin-bottom: 8px; }
+
+    /* FAB */
+    .fab {
+      position: fixed; bottom: 28px; right: 20px;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      color: white; border: none; font-size: 26px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(74,144,217,0.5);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .fab:active { transform: scale(0.92); }
+
+    /* 시트 모달 */
+    .backdrop {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.45); align-items: flex-end; justify-content: center;
+    }
+    .backdrop.open { display: flex; }
+    .sheet {
+      background: white; border-radius: 22px 22px 0 0;
+      width: 100%; max-width: 500px; padding: 0 20px 40px;
+      max-height: 90vh; overflow-y: auto;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: #ddd; margin: 12px auto 16px; }
+    .sheet-title {
+      font-size: 18px; font-weight: 700; margin-bottom: 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .close-btn {
+      background: #f0f4f8; border: none; width: 30px; height: 30px;
+      border-radius: 50%; font-size: 14px; cursor: pointer; color: #888;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { font-size: 12px; color: #888; font-weight: 600; display: block; margin-bottom: 6px; }
+    .form-group input {
+      width: 100%; border: 1.5px solid #e8e8e8; border-radius: 10px;
+      padding: 12px 14px; font-size: 15px; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: #4a90d9; }
+    .mic-btn {
+      width: 100%; padding: 12px; border-radius: 10px;
+      border: 1.5px dashed #4a90d9; background: #f5f9ff;
+      color: #4a90d9; font-size: 14px; cursor: pointer; margin-bottom: 8px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .mic-btn.recording { background: #fff5f5; border-color: #e53935; color: #e53935; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .mic-status { font-size: 12px; color: #888; margin-bottom: 12px; min-height: 16px; text-align: center; }
+    .save-btn {
+      width: 100%; padding: 15px; border-radius: 12px;
+      background: linear-gradient(135deg, #4a90d9, #2171c7);
+      color: white; border: none; font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .save-btn:active { opacity: 0.85; }
+
+    /* 상세 */
+    .detail-chip {
+      display: inline-block; background: #e8f0fe; color: #4a90d9;
+      border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; margin-bottom: 12px;
+    }
+    .detail-time { font-size: 28px; font-weight: 800; color: #222; margin-bottom: 10px; }
+    .detail-content {
+      font-size: 16px; line-height: 1.7; color: #444;
+      background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+    }
+    .del-btn {
+      width: 100%; padding: 13px; border-radius: 12px;
+      background: #fff5f5; color: #e53935; border: 1.5px solid #ffcdd2; font-size: 15px; cursor: pointer; font-weight: 600;
+    }
+
+    /* 백업 버튼 */
+    .backup-btn {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: white; border: none; font-size: 20px; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .backup-btn:active { transform: scale(0.9); }
+  </style>
+</head>
+<body>
+
+<!-- 로그인 화면 -->
+<div id="login-screen">
+  <div class="login-logo">📅</div>
+  <div class="login-title">스케줄 관리</div>
+  <div class="login-sub">나만의 일정을 관리해보세요</div>
+  <div class="login-box">
+    <label>이름을 입력하세요</label>
+    <input type="text" id="login-name" placeholder="예: 홍길동" maxlength="20"
+           onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="login-btn" onclick="doLogin()">시작하기</button>
+    <div class="login-note">이름이 곧 나의 공간이에요 🔒<br>다른 사람의 일정은 볼 수 없어요</div>
+  </div>
+</div>
+
+<!-- 앱 화면 -->
+<div id="app-screen">
+  <header>
+    <div class="header-left">
+      <h1>📅 스케줄 관리</h1>
+      <small id="header-username"></small>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+  </header>
+
+  <div class="container">
+    <div class="calendar-box">
+      <div class="cal-header">
+        <button onclick="changeMonth(-1)">‹</button>
+        <span class="cal-title" id="cal-title"></span>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="day-names">
+        <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+      </div>
+      <div class="days" id="days"></div>
+    </div>
+
+    <div class="section-header">
+      <span class="section-title" id="list-title">날짜를 선택하세요</span>
+      <span class="count-badge" id="count-badge" style="display:none"></span>
+    </div>
+    <div class="schedule-list" id="schedule-list"></div>
+  </div>
+
+  <button class="fab" onclick="openAdd()">＋</button>
+
+  <!-- 백업 버튼 (하단 고정) -->
+  <div style="position:fixed;bottom:28px;left:20px;display:flex;gap:10px;z-index:50;">
+    <button class="backup-btn" onclick="exportBackup()" title="백업 다운로드">💾</button>
+    <button class="backup-btn" onclick="document.getElementById('import-file').click()" title="백업 복원">📂</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBackup(event)">
+  </div>
+</div>
+
+<!-- 추가 시트 -->
+<div class="backdrop" id="add-sheet" onclick="backdropClose(event,'add-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      일정 추가
+      <button class="close-btn" onclick="closeSheet('add-sheet')">✕</button>
+    </div>
+    <div class="form-group"><label>날짜</label><input type="date" id="in-date"></div>
+    <div class="form-group"><label>시간</label><input type="time" id="in-time"></div>
+    <div class="form-group">
+      <label>내용</label>
+      <input type="text" id="in-content" placeholder="일정 내용을 입력하세요">
+    </div>
+    <button class="mic-btn" id="mic-btn" onclick="toggleVoice()">
+      <span>🎤</span><span id="mic-text">말로 입력하기</span>
+    </button>
+    <div class="mic-status" id="mic-status"></div>
+    <button class="save-btn" onclick="saveSchedule()">저장하기</button>
+  </div>
+</div>
+
+<!-- 상세 시트 -->
+<div class="backdrop" id="detail-sheet" onclick="backdropClose(event,'detail-sheet')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      일정 상세
+      <button class="close-btn" onclick="closeSheet('detail-sheet')">✕</button>
+    </div>
+    <span class="detail-chip" id="d-date"></span>
+    <div class="detail-time" id="d-time"></div>
+    <div class="detail-content" id="d-content"></div>
+    <button class="del-btn" onclick="deleteDetail()">🗑 이 일정 삭제</button>
+  </div>
+</div>
+
+<script>
+  let schedules = [], year, month, selDate, detailId;
+  let isRecording = false, recognition = null;
+
+  const todayStr = new Date().toISOString().slice(0,10);
+  const now = new Date();
+  year = now.getFullYear(); month = now.getMonth(); selDate = todayStr;
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+
+  // 로그인 체크
+  async function init() {
+    const res = await fetch('/api/me');
+    const data = await res.json();
+    if (data.user) showApp(data.user);
+  }
+
+  async function doLogin() {
+    const name = document.getElementById('login-name').value.trim();
+    if (!name) { alert('이름을 입력해주세요.'); return; }
+    const res = await fetch('/api/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name })
+    });
+    const data = await res.json();
+    if (data.ok) showApp(data.user);
+    else alert(data.msg);
+  }
+
+  function showApp(user) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+    document.getElementById('header-username').textContent = `${user}님의 스케줄`;
+    loadSchedules();
+  }
+
+  async function doLogout() {
+    await fetch('/api/logout', { method: 'POST' });
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('login-name').value = '';
+    schedules = [];
+  }
+
+  async function loadSchedules() {
+    const res = await fetch('/api/schedules');
+    schedules = await res.json();
+    renderCalendar(); renderList();
+  }
+
+  function changeMonth(d) {
+    month += d;
+    if (month < 0) { month = 11; year--; }
+    if (month > 11) { month = 0; year++; }
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    document.getElementById('cal-title').textContent = `${year}년 ${month+1}월`;
+    const container = document.getElementById('days');
+    container.innerHTML = '';
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month+1, 0).getDate();
+    const countMap = {};
+    schedules.forEach(s => { countMap[s.date] = (countMap[s.date]||0)+1; });
+
+    for (let i = 0; i < firstDay; i++) {
+      container.appendChild(Object.assign(document.createElement('div'), {className:'day empty'}));
+    }
+    for (let d = 1; d <= lastDate; d++) {
+      const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const el = document.createElement('div');
+      el.className = 'day' + (ds===todayStr?' today':'') + (ds===selDate?' selected':'');
+      const num = document.createElement('div');
+      num.className = 'day-num'; num.textContent = d;
+      el.appendChild(num);
+      const cnt = countMap[ds]||0;
+      if (cnt > 0) {
+        const row = document.createElement('div'); row.className = 'dot-row';
+        for (let i = 0; i < Math.min(cnt,3); i++) row.appendChild(Object.assign(document.createElement('div'),{className:'dot'}));
+        el.appendChild(row);
+      }
+      el.onclick = () => { selDate = ds; renderCalendar(); renderList(); };
+      container.appendChild(el);
+    }
+  }
+
+  function renderList() {
+    const d = new Date(selDate);
+    document.getElementById('list-title').textContent = `${d.getMonth()+1}월 ${d.getDate()}일 일정`;
+    const badge = document.getElementById('count-badge');
+    const list = document.getElementById('schedule-list');
+    const items = schedules.filter(s=>s.date===selDate).sort((a,b)=>a.time.localeCompare(b.time));
+    badge.style.display = items.length > 0 ? 'inline-block' : 'none';
+    badge.textContent = `${items.length}개`;
+    list.innerHTML = '';
+    if (items.length === 0) {
+      list.innerHTML = '<div class="empty-msg"><span class="emoji">📭</span>등록된 일정이 없어요<br><small style="color:#ccc;margin-top:4px;display:block">+ 버튼으로 추가해보세요</small></div>';
+      return;
+    }
+    items.forEach(s => {
+      const card = document.createElement('div');
+      card.className = 'schedule-card';
+      card.innerHTML = `<div class="schedule-time">${s.time}</div><div class="schedule-content">${s.content}</div><button class="schedule-del" onclick="event.stopPropagation();delSchedule('${s.id}')">✕</button>`;
+      card.onclick = () => openDetail(s);
+      list.appendChild(card);
+    });
+  }
+
+  function openAdd() {
+    document.getElementById('in-date').value = selDate;
+    document.getElementById('in-time').value = new Date().toTimeString().slice(0,5);
+    document.getElementById('in-content').value = '';
+    document.getElementById('mic-status').textContent = '';
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('mic-text').textContent = '말로 입력하기';
+    openSheet('add-sheet');
+  }
+
+  async function saveSchedule() {
+    const date = document.getElementById('in-date').value;
+    const time = document.getElementById('in-time').value;
+    const content = document.getElementById('in-content').value.trim();
+    if (!date||!time||!content) { alert('날짜, 시간, 내용을 모두 입력해주세요.'); return; }
+    await fetch('/api/schedules', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ date, time, content })
+    });
+    if (recognition) recognition.stop();
+    closeSheet('add-sheet');
+    loadSchedules();
+  }
+
+  async function delSchedule(id) {
+    if (!confirm('이 일정을 삭제할까요?')) return;
+    await fetch(`/api/schedules/${id}`, { method: 'DELETE' });
+    loadSchedules();
+  }
+
+  function openDetail(s) {
+    detailId = s.id;
+    const d = new Date(s.date);
+    document.getElementById('d-date').textContent = `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`;
+    document.getElementById('d-time').textContent = s.time;
+    document.getElementById('d-content').textContent = s.content;
+    openSheet('detail-sheet');
+  }
+
+  async function deleteDetail() {
+    if (!confirm('이 일정을 삭제할까요?')) return;
+    await fetch(`/api/schedules/${detailId}`, { method: 'DELETE' });
+    closeSheet('detail-sheet');
+    loadSchedules();
+  }
+
+  function toggleVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert('음성 인식은 Chrome 브라우저에서 지원됩니다.'); return; }
+    if (isRecording) { recognition.stop(); return; }
+    recognition = new SR();
+    recognition.lang = 'ko-KR'; recognition.continuous = false; recognition.interimResults = true;
+    recognition.onstart = () => {
+      isRecording = true;
+      document.getElementById('mic-btn').classList.add('recording');
+      document.getElementById('mic-text').textContent = '듣는 중... (누르면 중지)';
+      document.getElementById('mic-status').textContent = '🎙 말씀하세요...';
+    };
+    recognition.onresult = e => {
+      const t = Array.from(e.results).map(r=>r[0].transcript).join('');
+      document.getElementById('in-content').value = t;
+      document.getElementById('mic-status').textContent = `✅ 인식됨: ${t}`;
+    };
+    recognition.onend = () => {
+      isRecording = false;
+      document.getElementById('mic-btn').classList.remove('recording');
+      document.getElementById('mic-text').textContent = '말로 입력하기';
+    };
+    recognition.onerror = () => { document.getElementById('mic-status').textContent = '❌ 인식 실패. 다시 시도해주세요.'; };
+    recognition.start();
+  }
+
+  function openSheet(id) { document.getElementById(id).classList.add('open'); }
+  function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+  function backdropClose(e, id) { if (e.target.classList.contains('backdrop')) closeSheet(id); }
+
+  setInterval(() => {
+    const n = new Date();
+    const ns = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    schedules.forEach(s => {
+      if (!s._alerted && `${s.date} ${s.time}` === ns) {
+        if (Notification.permission==='granted') new Notification('📅 스케줄 알림', { body:`${s.time} — ${s.content}`, icon:'/static/icon-192.png' });
+        s._alerted = true;
+      }
+    });
+  }, 30000);
+
+  // 백업 내보내기
+  function exportBackup() {
+    window.location.href = '/api/backup/export';
+  }
+
+  // 백업 가져오기
+  async function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    let backup;
+    try { backup = JSON.parse(text); } catch { alert('올바른 백업 파일이 아니에요.'); return; }
+    if (!confirm(`백업 파일을 복원할까요?\n(기존 일정은 유지되고 새 일정만 추가돼요)`)) return;
+    const res = await fetch('/api/backup/import', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(backup)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      alert(`복원 완료!\n새로 추가된 일정: ${data.added}개\n전체 일정: ${data.total}개`);
+      loadSchedules();
+    } else {
+      alert('복원 실패: ' + data.error);
+    }
+    event.target.value = '';
+  }
+
+  init();
+</script>
+</body>
+</html>

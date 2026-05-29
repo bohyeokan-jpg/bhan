@@ -1,0 +1,7 @@
+schedules_*.json
+__pycache__/
+*.pyc
+.env
+static/icon-192.png
+static/icon-512.png
+make_icons.py
