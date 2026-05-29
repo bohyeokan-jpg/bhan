@@ -138,15 +138,18 @@ def delete_schedule(sid):
 @app.route("/api/backup/export")
 def export_backup():
     from flask import Response
+    from datetime import date
+    from urllib.parse import quote
     user = session.get("user")
     if not user:
         return jsonify({"error": "로그인 필요"}), 401
     data = load(user)
-    filename = f"schedule_backup_{user}_{__import__('datetime').date.today()}.json"
+    content = json.dumps({"user": user, "schedules": data}, ensure_ascii=False, indent=2)
+    filename = f"schedule_{user}_{date.today()}.json"
     return Response(
-        json.dumps({"user": user, "schedules": data}, ensure_ascii=False, indent=2),
-        mimetype="application/json",
-        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{__import__('urllib.parse', fromlist=['quote']).parse.quote(filename)}"}
+        content,
+        mimetype="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"}
     )
 
 
